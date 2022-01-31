@@ -1,90 +1,43 @@
-NAME 	= pipex
-PROG	= pipex
+SRCS = pipex.c utils.c
+SRCDIR = src
+OBJS_DIR = objs
+DEPS_DIR = deps
+CC = clang
+CFLAGS = -Wall -Wextra -Werror
+NAME = pipex
+LIB = -Llibft -lft
+OBJS := $(SRCS:%.c=$(OBJS_DIR)/%.o)
+I = -I./libft -I./minilibx-linux -I./inc
+DFLAGS= -MP -MMD -MF $(DEPS_DIR)/$*.d -MT '$@'
+DEPS = $(SRCS:%.c=$(DEPS_DIR)/%.d)
 
-SRCS 	= pipex.c utils.c
-SRCS_F 	= sources/
-OBJS 	= ${SRCS:.c=.o}
-OBJS_F	= _objFiles/
-MAIN	= sources/pipex.c
+all: $(NAME)
 
-# --- BONUS ---
-SRCS_B	= sources/pipex_bonus.c sources/utils.c sources/utils_bonus.c
-OBJS_B	= ${SRCS_B:.c=.o}
-MAIN_B	= sources/pipex_bonus.c
+$(OBJS_DIR):
+			@mkdir $@
 
-# --- LIBFT ---
-LIBFT_A = libft.a
-LIBF_DIR = Libft/
-LIBFT  = $(addprefix $(LIBF_DIR), $(LIBFT_A))
+$(DEPS_DIR):
+			@mkdir $@
 
-HEADER	= -I./includes/
+$(OBJS_DIR)/%.o: $(SRCDIR)/%.c | $(OBJS_DIR) $(DEPS_DIR)
+			$(CC) $(I) $(CFLAGS) $(DFLAGS) -c $< -o $@
 
-CC 		 = gcc
-CFLAGS 	 = -Wall -Wextra -Werror -g
-DBGFLAGS = -g -fsanitize=address
 
-# --- COLORS ---
-NONE='\033[0m'
-GREEN='\033[32m'
-GRAY='\033[2;37m'
-CURSIVE='\033[3m'
-
-# --- RULES ---
-all:		$(NAME)
-
-$(NAME):
-
-					@echo $(CURSIVE)$(GRAY) "     - Creating object directory..." $(NONE)
-					@mkdir -p $(OBJS_F)
-					@echo $(CURSIVE)$(GRAY) "     - Making object files..." $(NONE)
-					@$(CC) $(CFLAGS) -c $(addprefix $(SRCS_F), $(SRCS))
-					@echo $(CURSIVE)$(GRAY) "     - Moving object files to $(OBJS_F)..." $(NONE)	
-					@mv $(OBJS) $(OBJS_F)
-					@echo $(CURSIVE)$(GRAY) "     - Compiling Libft..." $(NONE)
-					@make -C $(LIBF_DIR)
-					@echo $(CURSIVE)$(GRAY) "     - Compiling $(NAME)..." $(NONE)
-					@$(CC) $(FLAGS) $(LIBFT) $(addprefix $(OBJS_F), $(OBJS)) -o $(NAME)
-					@echo $(GREEN)"- Pipex Compiled -"$(NONE)
-test:
-					@echo $(CURSIVE)$(GRAY) "     - Creating object directory..." $(NONE)
-					@mkdir -p $(OBJS_F)
-					@echo $(CURSIVE)$(GRAY) "     - Making object files..." $(NONE)
-					@$(CC) $(DBGFLAGS) -c $(addprefix $(SRCS_F), $(SRCS))
-					@echo $(CURSIVE)$(GRAY) "     - Moving object files to $(OBJS_F)..." $(NONE)	
-					@mv $(OBJS) $(OBJS_F)
-					@echo $(CURSIVE)$(GRAY) "     - Compiling Libft..." $(NONE)
-					@make -C $(LIBF_DIR)
-					@echo $(CURSIVE)$(GRAY) "     - Compiling $(NAME)..." $(NONE)
-					@$(CC) $(DBGFLAGS) $(LIBFT) $(addprefix $(OBJS_F), $(OBJS)) -o $(NAME)
-					@echo $(GREEN)"- Pipex Test Leaks Compiled -"$(NONE)
-
-bonus:		${OBJS_B}
-					@echo $(CURSIVE)$(GRAY) "     - Compiling Libft..." $(NONE)
-					@make re -C ./libft
-					@cp Libft/libft.a ./$(NAME)
-					@ar -rcs ${NAME} ${OBJS_B}
-					@$(CC) $(NAME) ${MAIN_B} -o ${PROG}
-					@echo $(GREEN)"Pipex Bonus Compiled!\n"
-
-bonus_test:		${OBJS_B}
-					@echo $(CURSIVE)$(GRAY) "     - Compiling Libft..." $(NONE)
-					@make re -C ./libft
-					@cp Libft/libft.a ./$(NAME)
-					@ar -rcs ${NAME} ${OBJS_B}
-					@$(CC) $(DBGFLAGS) $(NAME) ${MAIN_B} -o ${PROG}
-					@echo $(GREEN)"Pipex Bonus Compiled!\n"
+$(NAME): $(OBJS)
+			@make -C libft
+			$(CC) $(CFLAGS) $^ -o $(NAME) $(LIB)
 
 clean:
-					@make clean -C ./libft
-					@rm -rf $(OBJS_F)
-					@rm -f ${OBJS} ${OBJS_B}
+			@rm -rf $(OBJS_DIR)
+			@rm -rf $(DEPS_DIR)
+			@make -C libft clean
 
-fclean: 	clean
-					@make -C $(LIBF_DIR) fclean
-					@rm -f $(NAME)
-					@rm -f ${PROG}
-					@echo "\n\033[31mDeleting EVERYTHING!\n"
+fclean:	clean
+			@rm -f  $(NAME)
+			@make -C libft fclean
 
-re:			fclean all
+re: fclean all
 
-.PHONY: all clean fclean re bonus
+-include $(DEPS)
+
+.PHONY:	clean re fclean all
