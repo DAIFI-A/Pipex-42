@@ -1,31 +1,42 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adaifi <adaifi@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/02 14:42:08 by adaifi            #+#    #+#             */
+/*   Updated: 2022/02/02 14:42:08 by adaifi           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 # include <stdlib.h>
 # include <unistd.h>
 # include <string.h>
 # include <stdio.h>
 # include <sys/wait.h>
 # include <fcntl.h>
-
 # include "pipex.h"
 
-static void	execute(char **cmd, char **envp)
-{
-	char	*path;
+// static void	execute(char **cmd, char **envp)
+// {
+// 	char	*path;
 
-	if (!ft_strchr(cmd[0], '/'))
-	{
-		path = get_path(envp, cmd[0]);
-		execve(path, cmd, envp);
-		error(cmd[0], "command not found");
-	}
-	else
-	{
-		path = cmd[0];
-		if (access(path, X_OK))
-			error(path, strerror(errno));
-		else
-			execve(path, cmd, envp);
-	}
-}
+// 	if (!ft_strchr(cmd[0], '/'))
+// 	{
+// 		path = get_path(envp, cmd[0]);
+// 		execve(path, cmd, envp);
+// 		error(cmd[0], "command not found");
+// 	}
+// 	else
+// 	{
+// 		path = cmd[0];
+// 		if (access(path, X_OK))
+// 			error(path, strerror(errno));
+// 		else
+// 			execve(path, cmd, envp);
+// 	}
+// }
 
 static void	run(char *arg, char **envp)
 {
@@ -36,10 +47,8 @@ static void	run(char *arg, char **envp)
 	if (*arg)
 	{
 		cmd = ft_split(arg, ' ');
-		execute(cmd, envp);
-		while (cmd[i])
-			free(cmd[i++]);
-		free(cmd);
+		execve(get_path(envp, cmd[0]), cmd, envp);
+		error(cmd[0], "command not found");
 	}
 	else
 	{
