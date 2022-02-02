@@ -13,61 +13,28 @@
 
 #include "pipex.h"
 
-static char	*parse_path(char *path, char *arg)
+char	*get_path(char *arg, char **envp)
 {
-	char	*exe;
-	char	*tmp;
-	int		i;
-
-	i = 0;
-	while (path[i] && path[i] != ':')
-		i++;
-	tmp = malloc(sizeof(char) * i + 2);
-	if (!tmp)
-		return (0);
-	ft_bzero(tmp, i + 2);
-	i = 0;
-	while (*path && *path != ':')
-	{
-		tmp[i] = *path;
-		path++;
-		i++;
-	}
-	tmp[i] = '/';
-	exe = ft_strjoin(tmp, arg);
-	free(tmp);
-	return (exe);
-}
-
-
-char	*get_path(char **envp, char *arg)
-{
-	int		i;
+	char	**paths;
 	char	*path;
-	char	*exe;
+	int		i;
+	char	*tmp;
 
 	i = 0;
-	path = NULL;
-	while (envp[i] && ft_strncmp("PATH=", envp[i], 5))
+	while (*path && ft_strncmp(envp[i], "PATH=", 5) == 0)
 		i++;
-	if (!envp[i])
-		return (arg);
-	path = envp[i] + 5;
-	while (*path)
+	paths = ft_split(envp[i] + 5, ':');
+	i = 0;
+	while (paths[i])
 	{
-		if (path == envp[i] + 5 || *path == ':')
-		{
-			exe = parse_path(path + !(path == envp[i] + 5), arg);
-			//write(1, path + !(path == envp[i]), 10);
-			if (!access(exe, F_OK))
-				return (exe);
-			write(1, exe, 18);
-			write(1, "\n", 2);
-			free(exe);
-		}
-		path++;
+		tmp = ft_strjoin(paths[i], "/");
+		path = ft_strjoin(tmp, arg);
+		free(tmp);
+		if (access(path, F_OK) == 0)
+			return (path);
+		i++;
 	}
-	return (arg);
+	return (0);
 }
 
 void	error(char *name, char *err)
