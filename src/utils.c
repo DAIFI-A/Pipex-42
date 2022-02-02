@@ -13,7 +13,7 @@
 
 #include "pipex.h"
 
-char	*get_path(char *arg, char **envp)
+char	*get_path(char **envp, char *arg)
 {
 	char	**paths;
 	char	*path;
