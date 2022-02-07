@@ -35,3 +35,4 @@ in this project we are allowed to use the following functions:
 * [**perror**](http://manpagesfr.free.fr/man/man3/perror.3.html)
 * [**strerror**](http://manpagesfr.free.fr/man/man3/strerror.3.html)
 * [**exit**](http://manpagesfr.free.fr/man/man3/exit.3.html)
+* [**SUBJECT.pdf**](https://cdn.intra.42.fr/pdf/pdf/40826/en.subject.pdf)
