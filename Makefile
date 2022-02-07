@@ -6,34 +6,26 @@
 #    By: adaifi <adaifi@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/31 20:05:24 by adaifi            #+#    #+#              #
-#    Updated: 2022/01/31 20:40:31 by adaifi           ###   ########.fr        #
+#    Updated: 2022/02/05 14:36:10 by adaifi           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRCS = pipex.c utils.c
 SRCDIR = src
 OBJS_DIR = objs
-DEPS_DIR = deps
 CC = clang
 CFLAGS = -Wall -Wextra -Werror
 NAME = pipex
 LIB = -Llibft -lft
 OBJS := $(SRCS:%.c=$(OBJS_DIR)/%.o)
-I = -I./libft -I./minilibx-linux -I./inc
-DFLAGS= -MP -MMD -MF $(DEPS_DIR)/$*.d -MT '$@'
-DEPS = $(SRCS:%.c=$(DEPS_DIR)/%.d)
 
 all: $(NAME)
 
 $(OBJS_DIR):
 			@mkdir $@
 
-$(DEPS_DIR):
-			@mkdir $@
-
-$(OBJS_DIR)/%.o: $(SRCDIR)/%.c | $(OBJS_DIR) $(DEPS_DIR)
-			$(CC) $(I) $(CFLAGS) $(DFLAGS) -c $< -o $@
-
+$(OBJS_DIR)/%.o: $(SRCDIR)/%.c | $(OBJS_DIR)
+			$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
 			@make -C libft
@@ -41,7 +33,6 @@ $(NAME): $(OBJS)
 
 clean:
 			@rm -rf $(OBJS_DIR)
-			@rm -rf $(DEPS_DIR)
 			@make -C libft clean
 
 fclean:	clean

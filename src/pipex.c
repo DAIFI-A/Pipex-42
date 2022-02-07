@@ -5,40 +5,20 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: adaifi <adaifi@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/02 14:42:08 by adaifi            #+#    #+#             */
-/*   Updated: 2022/02/02 14:42:08 by adaifi           ###   ########.fr       */
+/*   Created: 2022/02/03 17:13:22 by adaifi            #+#    #+#             */
+/*   Updated: 2022/02/03 17:13:22 by adaifi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include <stdlib.h>
-# include <unistd.h>
-# include <string.h>
-# include <stdio.h>
-# include <sys/wait.h>
-# include <fcntl.h>
-# include "pipex.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include "pipex.h"
 
-// static void	execute(char **cmd, char **envp)
-// {
-// 	char	*path;
-
-// 	if (!ft_strchr(cmd[0], '/'))
-// 	{
-// 		path = get_path(envp, cmd[0]);
-// 		execve(path, cmd, envp);
-// 		error(cmd[0], "command not found");
-// 	}
-// 	else
-// 	{
-// 		path = cmd[0];
-// 		if (access(path, X_OK))
-// 			error(path, strerror(errno));
-// 		else
-// 			execve(path, cmd, envp);
-// 	}
-// }
-
-static void	run(char *arg, char **envp)
+static void	execute(char *arg, char **envp)
 {
 	char	**cmd;
 	int		i;
@@ -64,13 +44,14 @@ static void	pipex(int fd1, int fd2, char **argv, char **envp)
 
 	id = 1;
 	pipe(fd);
-	id = fork();
+	if (fd1 != -1)
+		id = fork();
 	if (id == 0)
 	{
 		dup2(fd1, 0);
 		close(fd[0]);
 		dup2(fd[1], 1);
-		run(argv[2], envp);
+		execute(argv[2], envp);
 	}
 	else
 	{
@@ -78,7 +59,7 @@ static void	pipex(int fd1, int fd2, char **argv, char **envp)
 		close(fd[1]);
 		dup2(fd[0], 0);
 		wait(NULL);
-		run(argv[3], envp);
+		execute(argv[3], envp);
 	}
 }
 
@@ -89,17 +70,17 @@ int	main(int argc, char **argv, char *envp[])
 
 	if (argc == 5)
 	{
-		file1 = open(argv[1], O_CREAT | O_RDWR, 0777);
+		file1 = open(argv[1], O_CREAT | O_RDONLY, 00664);
 		if (file1 == -1)
 			error(argv[1], strerror(errno));
-		file2 = open(argv[4], O_CREAT | O_WRONLY | O_TRUNC, 0777);
+		file2 = open(argv[4], O_CREAT | O_WRONLY | O_TRUNC, 00664);
 		if (file2 == -1)
 		{
 			error(argv[4], strerror(errno));
-			return (0);
+			return (1);
 		}
 		pipex(file1, file2, argv, envp);
 	}
 	ft_putstr_fd("Invalid arguments.\n", 2);
-	return (0);
+	return (1);
 }
